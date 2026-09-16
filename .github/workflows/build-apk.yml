@@ -9,6 +9,7 @@ permissions:
   contents: read
 
 env:
+  SIGNING_BUNDLE_BASE64: ${{ secrets.SIGNING_BUNDLE_BASE64 }}
   SIGNING_KEYSTORE_BASE64: ${{ secrets.SIGNING_KEYSTORE_BASE64 }}
   SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
 
@@ -51,8 +52,17 @@ jobs:
       - name: Prepare signing channel
         shell: bash
         run: |
-          if [ -n "$SIGNING_KEYSTORE_BASE64" ] && [ -n "$SIGNING_PASSWORD" ]; then
-            mkdir -p signing
+          mkdir -p signing
+          if [ -n "$SIGNING_BUNDLE_BASE64" ]; then
+            printf '%s' "$SIGNING_BUNDLE_BASE64" | base64 --decode > /tmp/shotlist-signing.zip
+            unzip -q /tmp/shotlist-signing.zip -d signing
+            PASSWORD=$(cat signing/password.txt)
+            echo "SHOTLIST_KEYSTORE_PATH=$GITHUB_WORKSPACE/signing/shotlist-stable.jks" >> "$GITHUB_ENV"
+            echo "SHOTLIST_SIGNING_PASSWORD=$PASSWORD" >> "$GITHUB_ENV"
+            echo "BUILD_VARIANT=Release" >> "$GITHUB_ENV"
+            echo "APK_SOURCE=app/build/outputs/apk/release/app-release.apk" >> "$GITHUB_ENV"
+            echo "SIGNING_CHANNEL=stable-release" >> "$GITHUB_ENV"
+          elif [ -n "$SIGNING_KEYSTORE_BASE64" ] && [ -n "$SIGNING_PASSWORD" ]; then
             printf '%s' "$SIGNING_KEYSTORE_BASE64" | base64 --decode > signing/shotlist-stable.jks
             echo "SHOTLIST_KEYSTORE_PATH=$GITHUB_WORKSPACE/signing/shotlist-stable.jks" >> "$GITHUB_ENV"
             echo "SHOTLIST_SIGNING_PASSWORD=$SIGNING_PASSWORD" >> "$GITHUB_ENV"
