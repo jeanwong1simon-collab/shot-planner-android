@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.ViewGroup;
 import android.webkit.JavascriptInterface;
 import android.webkit.ValueCallback;
@@ -126,8 +127,16 @@ public class MainActivity extends Activity {
             if (fileChooserCallback != null) {
                 Uri[] result = null;
                 if (resultCode == RESULT_OK && data != null) {
-                    Uri uri = data.getData();
-                    if (uri != null) result = new Uri[]{uri};
+                    if (data.getClipData() != null) {
+                        ClipData clip = data.getClipData();
+                        result = new Uri[clip.getItemCount()];
+                        for (int i = 0; i < clip.getItemCount(); i++) {
+                            result[i] = clip.getItemAt(i).getUri();
+                        }
+                    } else {
+                        Uri uri = data.getData();
+                        if (uri != null) result = new Uri[]{uri};
+                    }
                 }
                 fileChooserCallback.onReceiveValue(result);
                 fileChooserCallback = null;

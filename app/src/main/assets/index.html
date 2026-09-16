@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>拍摄清单 App v1.1.2｜乌江寨芙蓉镇 自动粗剪版</title>
 <link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="reference_gallery.css" />
 </head>
 <body>
 <div class="app">
@@ -19,7 +20,7 @@
   <section id="screen-publish" class="screen"><div class="card hero"><div class="section-title">标题 / 简介 / 标签 / BGM</div><div class="meta-text">拍完后直接进入发布流程，不用再临时想文案。</div></div><div id="publishList" class="list"></div></section>
   <section id="screen-platform" class="screen"><div class="card hero"><div class="section-title">按平台发布版</div><div class="meta-text">这里给你拆成 B站 / 小红书 / 视频号 三套发法，每个平台都不同。</div></div><div id="platformList" class="list"></div></section>
   <section id="screen-locations" class="screen"><button class="backlink" id="backToProjects">← 返回项目</button><div class="card hero" id="locationsHero"></div><div id="locationList" class="list"></div></section>
-  <section id="screen-shots" class="screen"><button class="backlink" id="backToLocations">← 返回地点</button><div class="card hero" id="shotsHero"></div><div class="card progress-wrap"><div class="row"><strong id="progressText">进度</strong><div class="spacer"></div><label class="switch"><input type="checkbox" id="sortDoneToggle"> 已拍排到底部</label></div><div class="bar"><span id="progressBar"></span></div></div><input id="searchInput" class="search" placeholder="搜索镜头名称 / 内容 / 时间 / 设备 / 旁白..." /><div class="toolbar" id="filters"></div><div id="shotList"></div></section>
+  <section id="screen-shots" class="screen"><button class="backlink" id="backToLocations">← 返回地点</button><div class="card hero" id="shotsHero"></div><div class="card progress-wrap"><div class="row"><strong id="progressText">进度</strong><div class="spacer"></div><label class="switch"><input type="checkbox" id="sortDoneToggle"> 已拍排到底部</label></div><div class="bar"><span id="progressBar"></span></div></div><input id="searchInput" class="search" placeholder="搜索镜头名称 / 内容 / 时间 / 设备 / 旅白..." /><div class="toolbar" id="filters"></div><div id="shotList"></div></section>
   <section id="screen-report" class="screen"><div class="card hero"><div class="section-title">拍摄完成报告</div><div class="meta-text">按当前“已拍 / 未拍 / 重拍”状态自动汇总，离开景区前和回家开剪前都可以看。</div><div class="actions"><button class="btn secondary small" id="copyReportBtn">复制完成报告</button><button class="btn secondary small" id="exportReportBtn">导出 TXT 报告</button></div></div><div id="reportSummary" class="list"></div></section>
   <section id="screen-delivery" class="screen"><div class="card hero"><div class="section-title">按已拍素材生成可交付版本</div><div class="meta-text">选择一个目标平台，App 会按你当前已拍素材判断覆盖度、可用段落和仍需补拍的镜头。</div><div class="row" style="margin-top:10px"><select id="deliveryProfileSelect" class="selector"></select><button class="btn secondary small" id="copyDeliveryBtn">复制当前交付方案</button></div></div><div id="deliverySummary" class="card roughcard" style="margin-bottom:12px"></div><div id="deliveryList" class="list"></div></section>
   <section id="screen-dual" class="screen"><div class="card hero"><div class="section-title">横屏 / 竖屏双版本</div><div class="meta-text">同一套素材共用拍摄状态，只切换输出视角，不需要建立两份重复项目。</div></div><div id="dualModeList" class="grid2"></div><div class="card pubcard" style="margin-top:12px"><h3>当前输出模式</h3><div id="dualCurrent" class="summarybox"></div><div class="actions"><button class="btn secondary small" id="dualGoRough">去看对应粗剪</button><button class="btn secondary small" id="dualGoShots">回到镜头清单</button></div></div></section>
@@ -34,5 +35,6 @@
 <script src="data_meta.js"></script>
 <script src="data_build.js"></script>
 <script src="app.js"></script>
+<script src="reference_gallery.js"></script>
 </body>
 </html>
