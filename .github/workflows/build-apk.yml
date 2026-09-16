@@ -8,10 +8,14 @@ on:
 permissions:
   contents: read
 
+env:
+  SIGNING_KEYSTORE_BASE64: ${{ secrets.SIGNING_KEYSTORE_BASE64 }}
+  SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
+
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -37,15 +41,53 @@ jobs:
         with:
           gradle-version: '8.9'
 
-      - name: Build debug APK
-        run: gradle :app:assembleDebug --stacktrace --no-daemon
+      - name: Static JS syntax checks
+        run: |
+          find app/src/main/assets -maxdepth 1 -name '*.js' -print0 | xargs -0 -n1 node --check
 
-      - name: Rename APK
-        run: cp app/build/outputs/apk/debug/app-debug.apk shotlist-v1.1.6.apk
+      - name: App source QA checks
+        run: python3 qa/check_app.py
+
+      - name: Prepare signing channel
+        shell: bash
+        run: |
+          if [ -n "$SIGNING_KEYSTORE_BASE64" ] && [ -n "$SIGNING_PASSWORD" ]; then
+            mkdir -p signing
+            printf '%s' "$SIGNING_KEYSTORE_BASE64" | base64 --decode > signing/shotlist-stable.jks
+            echo "SHOTLIST_KEYSTORE_PATH=$GITHUB_WORKSPACE/signing/shotlist-stable.jks" >> "$GITHUB_ENV"
+            echo "SHOTLIST_SIGNING_PASSWORD=$SIGNING_PASSWORD" >> "$GITHUB_ENV"
+            echo "BUILD_VARIANT=Release" >> "$GITHUB_ENV"
+            echo "APK_SOURCE=app/build/outputs/apk/release/app-release.apk" >> "$GITHUB_ENV"
+            echo "SIGNING_CHANNEL=stable-release" >> "$GITHUB_ENV"
+          else
+            echo "BUILD_VARIANT=Debug" >> "$GITHUB_ENV"
+            echo "APK_SOURCE=app/build/outputs/apk/debug/app-debug.apk" >> "$GITHUB_ENV"
+            echo "SIGNING_CHANNEL=qa-debug" >> "$GITHUB_ENV"
+          fi
+
+      - name: Android Lint
+        run: gradle :app:lint${BUILD_VARIANT} --stacktrace --no-daemon
+
+      - name: Build APK
+        run: gradle :app:assemble${BUILD_VARIANT} --stacktrace --no-daemon
+
+      - name: Package APK
+        run: |
+          cp "$APK_SOURCE" shotlist-v1.1.7.apk
+          echo "Build channel: $SIGNING_CHANNEL"
+          ls -lh shotlist-v1.1.7.apk
+
+      - name: Verify APK signature and metadata
+        run: |
+          APKSIGNER="$ANDROID_SDK_ROOT/build-tools/35.0.0/apksigner"
+          AAPT="$ANDROID_SDK_ROOT/build-tools/35.0.0/aapt"
+          "$APKSIGNER" verify --verbose --print-certs shotlist-v1.1.7.apk
+          "$AAPT" dump badging shotlist-v1.1.7.apk | head -20
+          unzip -t shotlist-v1.1.7.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: shotlist-v1.1.6-apk
-          path: shotlist-v1.1.6.apk
+          name: shotlist-v1.1.7-apk
+          path: shotlist-v1.1.7.apk
           if-no-files-found: error
