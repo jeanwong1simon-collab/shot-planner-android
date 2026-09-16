@@ -101,3 +101,5 @@ jobs:
           name: shotlist-v1.1.7-apk
           path: shotlist-v1.1.7.apk
           if-no-files-found: error
+
+# Stable signing rebuild trigger
